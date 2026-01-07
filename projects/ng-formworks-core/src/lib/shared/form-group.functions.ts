@@ -5,9 +5,7 @@ import {
   UntypedFormGroup,
   ValidatorFn
 } from '@angular/forms';
-import cloneDeep from 'lodash/cloneDeep';
-import filter from 'lodash/filter';
-import map from 'lodash/map';
+import { cloneDeep, filter, map} from 'lodash-es';
 import { getControlValidators, removeRecursiveReferences } from './json-schema.functions';
 import { JsonValidators } from './json.validators';
 import { JsonPointer, Pointer } from './jsonpointer.functions';
@@ -753,7 +751,8 @@ export function formatFormData(
         (value === null && returnEmptyFields)
       ) {
         if (genericPointer.indexOf("/$")>=0) {
-          return formattedData;
+          // Skip logging for internal "$" paths; no need to return a value
+          return;
         }
         console.error('formatFormData error: ' +
           `Schema type not found for form value at ${genericPointer}`);

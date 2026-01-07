@@ -1,5 +1,5 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -52,7 +52,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class TextareaComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
   controlValue: any;
   controlDisabled = false;

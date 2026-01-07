@@ -1,7 +1,7 @@
 import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, inject, input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { JsonSchemaFormService } from '@ng-formworks/core';
-import { memoize } from 'lodash';
+import { memoize } from 'lodash-es';
 
 
 @Component({
@@ -10,6 +10,7 @@ import { memoize } from 'lodash';
     template: `
     <div cdkDropList (cdkDropListDropped)="drop($event)"
       [class.flex-inherit]="true"
+      [style.gap]="'0 20px'"
       [cdkDropListSortPredicate]="sortPredicate"
       >
       <!-- -for now left out
@@ -18,7 +19,7 @@ import { memoize } from 'lodash';
       You must explicitly disable dragging on the main element
       and re-enable it only when using the handle.
       -->
-      @for (layoutItem of layout(); track layoutItem; let i = $index) {
+      @for (layoutItem of layout(); track trackByFn($index, layoutItem); let i = $index) {
         <div
           cdkDrag  [cdkDragStartDelay]="{touch:1000,mouse:0}"
           [cdkDragDisabled]="!isDraggable(layoutItem)"
@@ -59,25 +60,25 @@ import { memoize } from 'lodash';
     .example-list {
   width: 500px;
   max-width: 100%;
-  border: solid 1px #ccc;
+  border: solid 1px var(--mat-sys-outline);
   min-height: 60px;
   display: block;
-  background: white;
+  background: var(--mat-sys-surface);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .example-box {
   padding: 20px 10px;
-  border-bottom: solid 1px #ccc;
-  color: rgba(0, 0, 0, 0.87);
+  border-bottom: solid 1px var(--mat-sys-outline);
+  color: var(--mat-sys-on-surface);
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   cursor: move;
-  background: white;
+  background: var(--mat-sys-surface);
   font-size: 14px;
 }
 
@@ -114,8 +115,7 @@ import { memoize } from 'lodash';
 }
     
 `,
-    //changeDetection: ChangeDetectionStrategy.Default,
-    changeDetection:ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class FlexLayoutRootComponent implements OnInit,OnDestroy,OnChanges {
@@ -210,8 +210,7 @@ export class FlexLayoutRootComponent implements OnInit,OnDestroy,OnChanges {
       return this._getSelectFrameworkInputsRaw(layoutItem, i);
     }
   }
-  //TODO investigate-causing layout issue with layout,for now
-  //removed from template
+    
     trackByFn(index: number, item: any): any {
       return item._id ?? index;
     }
@@ -230,5 +229,5 @@ export class FlexLayoutRootComponent implements OnInit,OnDestroy,OnChanges {
     //this.selectframeworkInputCache=null;
     this._getSelectFrameworkInputsMemoized.cache.clear();
     //this.dataChangesSubs?.unsubscribe();
-}
+  }
 }

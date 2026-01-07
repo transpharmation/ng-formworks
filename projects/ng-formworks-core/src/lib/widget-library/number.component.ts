@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, input } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
@@ -67,7 +67,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class NumberComponent implements OnInit,OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
   controlValue: any;
   controlDisabled = false;

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 
@@ -9,6 +9,7 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     template: `
     <mat-form-field [appearance]="options?.appearance || matFormFieldDefaultOptions?.appearance || 'fill'"
       [class]="options?.htmlClass || ''"
+      [ngClass]="{ 'required-pending': options?.required && !(boundControl ? formControl?.value : controlValue) }"
       [floatLabel]="options?.floatLabel || matFormFieldDefaultOptions?.floatLabel || (options?.notitle ? 'never' : 'auto')"
       [hideRequiredMarker]="options?.hideRequired ? 'true' : 'false'"
       [style.width]="'100%'">
@@ -80,6 +81,9 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
     ::ng-deep json-schema-form mat-form-field .mat-mdc-form-field-wrapper .mat-form-field-flex
       .mat-form-field-infix { width: initial; }
+    .required-pending .mat-mdc-text-field-wrapper {
+      background-color: rgba(255, 193, 7, 0.08);
+    }
   `],
     standalone: false
 })
@@ -87,7 +91,7 @@ export class MaterialNumberComponent implements OnInit,OnDestroy {
   matFormFieldDefaultOptions = inject(MAT_FORM_FIELD_DEFAULT_OPTIONS, { optional: true });
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
   controlValue: any;
   controlDisabled = false;
@@ -98,14 +102,13 @@ export class MaterialNumberComponent implements OnInit,OnDestroy {
   allowExponents = false;
   lastValidNumber = '';
   readonly layoutNode = input<any>(undefined);
-  readonly layoutIndex = input<number[]>(undefined);
-  readonly dataIndex = input<number[]>(undefined);
+  readonly layoutIndex = input<number[]>([]);
+  readonly dataIndex = input<number[]>([]);
 
   //needed as templates don't accept something like [attributes]="options?.['x-inputAttributes']"
   get inputAttributes() {
      return this.options?.['x-inputAttributes'];
   }
-
   
   ngOnInit() {
     this.options = this.layoutNode().options || {};

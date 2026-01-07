@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input } from '@angular/core';
+import { Component, inject, input, OnInit } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 
@@ -25,14 +25,12 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
       [isFlexItem]="getFlexAttribute('is-flex')"
       [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
       [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-      [style.display]="!expanded?'none':getFlexAttribute('display')"
       [style.flex-direction]="getFlexAttribute('flex-direction')"
       [style.flex-wrap]="getFlexAttribute('flex-wrap')"
       [style.justify-content]="getFlexAttribute('justify-content')"
       [style.align-items]="getFlexAttribute('align-items')"
       [style.align-content]="getFlexAttribute('align-content')"
-      [attr.fxLayout]="getFlexAttribute('layout')"
-      [attr.fxLayoutGap]="options?.fxLayoutGap"
+      [style.gap]="options?.fxLayoutGap"
       [attr.fxLayoutAlign]="options?.fxLayoutAlign"
     [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
     @if (options?.showErrors && options?.errorMessage) {
@@ -54,22 +52,20 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
         [innerHTML]="sectionTitle"
       (click)="toggleExpanded()"></legend>
     }
-    <flex-layout-root-widget
+    <flex-layout-root-widget 
       [layout]="layoutNode().items"
       [dataIndex]="dataIndex()"
       [layoutIndex]="layoutIndex()"
       [isFlexItem]="getFlexAttribute('is-flex')"
       [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
       [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-      [style.display]="!expanded?'none':getFlexAttribute('display')"
       [style.flex-direction]="getFlexAttribute('flex-direction')"
       [style.flex-wrap]="getFlexAttribute('flex-wrap')"
       [style.justify-content]="getFlexAttribute('justify-content')"
       [style.align-items]="getFlexAttribute('align-items')"
       [style.align-content]="getFlexAttribute('align-content')"
-      [attr.fxLayout]="getFlexAttribute('layout')"
-      [attr.fxLayoutGap]="options?.fxLayoutGap"
       [attr.fxLayoutAlign]="options?.fxLayoutAlign"
+      [style.gap]="options?.fxLayoutGap"
     [attr.attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
     @if (options?.showErrors && options?.errorMessage) {
       <mat-error
@@ -80,15 +76,16 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
 
 @if (containerType === 'card') {
   <mat-card appearance="outlined"
-    [ngClass]="options?.htmlClass || ''"
     [class.expandable]="options?.expandable && !expanded"
-    [class.expanded]="options?.expandable && expanded">
+    [class.expanded]="options?.expandable && expanded"
+    [style.margin]="'10px 0'"
+    [ngClass]="options?.htmlClass || ''">
     @if (sectionTitle) {
       <mat-card-header>
         <legend
           [class]="'legend ' + (options?.labelHtmlClass || '')"
           [innerHTML]="sectionTitle"
-        (click)="toggleExpanded()"></legend>
+          (click)="toggleExpanded()"></legend>
       </mat-card-header>
     }
     <mat-card-content >
@@ -100,14 +97,12 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
           [isFlexItem]="getFlexAttribute('is-flex')"
           [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
           [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-          [style.display]="!expanded?'none':getFlexAttribute('display')"
           [style.flex-direction]="getFlexAttribute('flex-direction')"
           [style.flex-wrap]="getFlexAttribute('flex-wrap')"
           [style.justify-content]="getFlexAttribute('justify-content')"
           [style.align-items]="getFlexAttribute('align-items')"
           [style.align-content]="getFlexAttribute('align-content')"
-          [attr.fxLayout]="getFlexAttribute('layout')"
-          [attr.fxLayoutGap]="options?.fxLayoutGap"
+          [style.gap]="options?.fxLayoutGap"
           [attr.fxLayoutAlign]="options?.fxLayoutAlign"
         [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
       </fieldset>
@@ -123,34 +118,31 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
 
 @if (containerType === 'expansion-panel') {
   <mat-expansion-panel
-    [expanded]="expanded"
     [hideToggle]="!options?.expandable">
     <mat-expansion-panel-header>
       <mat-panel-title>
         @if (sectionTitle) {
           <legend
             [class]="options?.labelHtmlClass"
-            [innerHTML]="sectionTitle"
-          (click)="toggleExpanded()"></legend>
+            [innerHTML]="sectionTitle">
+          (click)="toggleExpanded()"</legend>
         }
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <fieldset [disabled]="options?.readonly">
-      <flex-layout-root-widget
+    <fieldset>
+      <flex-layout-root-widget 
         [layout]="layoutNode().items"
         [dataIndex]="dataIndex()"
         [layoutIndex]="layoutIndex()"
         [isFlexItem]="getFlexAttribute('is-flex')"
         [class.form-flex-column]="getFlexAttribute('flex-direction') === 'column'"
         [class.form-flex-row]="getFlexAttribute('flex-direction') === 'row'"
-        [style.display]="!expanded?'none':getFlexAttribute('display')"
         [style.flex-direction]="getFlexAttribute('flex-direction')"
         [style.flex-wrap]="getFlexAttribute('flex-wrap')"
         [style.justify-content]="getFlexAttribute('justify-content')"
         [style.align-items]="getFlexAttribute('align-items')"
         [style.align-content]="getFlexAttribute('align-content')"
-        [attr.fxLayout]="getFlexAttribute('layout')"
-        [attr.fxLayoutGap]="options?.fxLayoutGap"
+        [style.gap]="options?.fxLayoutGap"
         [attr.fxLayoutAlign]="options?.fxLayoutAlign"
       [attr.fxFlexFill]="options?.fxLayoutAlign"></flex-layout-root-widget>
     </fieldset>
@@ -159,14 +151,9 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
       [innerHTML]="options?.errorMessage"></mat-error>
     }
   </mat-expansion-panel>
-}`,
-    styles: [`
-    fieldset { border: 0; margin: 0; padding: 0; }
-    .legend { font-weight: bold; }
-    .expandable > .legend:before { content: '▶'; padding-right: .3em; font-family:auto }
-    .expanded > .legend:before { content: '▼'; padding-right: .2em; }
-  `],
-    standalone: false
+  }`,
+  styleUrls: ['./flex-layout-section.component.scss'],
+  standalone: false
 })
 export class FlexLayoutSectionComponent implements OnInit {
   private jsf = inject(JsonSchemaFormService);
@@ -178,6 +165,7 @@ export class FlexLayoutSectionComponent implements OnInit {
   boundControl = false;
   options: any;
   expanded = true;
+  expandable = true;
   containerType = 'div';
   readonly layoutNode = input<any>(undefined);
   readonly layoutIndex = input<number[]>(undefined);
@@ -228,7 +216,7 @@ export class FlexLayoutSectionComponent implements OnInit {
       case 'flex-direction': case 'flex-wrap':
         const index = ['flex-direction', 'flex-wrap'].indexOf(attribute);
         return (this.options['flex-flow'] || '').split(/\s+/)[index] ||
-          this.options[attribute] || ['column', 'nowrap'][index];
+          this.options[attribute] || ['column', 'wrap', 'nowrap'][index];
       case 'justify-content': case 'align-items': case 'align-content':
         return this.options[attribute];
       case 'layout':

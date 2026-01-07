@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input, inject } from '@angular/core';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 
 
@@ -6,9 +6,9 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     // tslint:disable-next-line:component-selector
     selector: 'material-add-reference-widget',
     template: `
-    <section [class]="options?.htmlClass || ''" align="end">
+    <section [class]="options?.htmlClass || ''" align="end" class="add-reference-container">
       @if (showAddButton) {
-        <button mat-raised-button
+        <button mat-stroked-button
           [color]="options?.color || 'accent'"
           [disabled]="options?.readonly"
           (click)="addItem($event)"
@@ -22,6 +22,11 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
         </button>
       }
     </section>`,
+    styles: [`
+      .add-reference-container {
+        padding-top: 0.75rem;
+      }
+    `],
     changeDetection: ChangeDetectionStrategy.Default,
     standalone: false
 })
@@ -56,7 +61,7 @@ export class MaterialAddReferenceComponent implements OnInit {
       layoutIndex: this.layoutIndex().slice(0, -1),
       layoutNode: this.jsf.getParentNode(this),
     };
-    return parent.layoutNode && (parent.layoutNode.add ||
-      this.jsf.setArrayItemTitle(parent, this.layoutNode(), this.itemCount));
+    return parent.layoutNode.add ||
+      this.jsf.setArrayItemTitle(parent, this.layoutNode(), this.itemCount);
   }
 }

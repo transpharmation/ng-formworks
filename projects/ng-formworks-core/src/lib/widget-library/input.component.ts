@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { JsonSchemaFormService } from '../json-schema-form.service';
 
 
@@ -69,7 +69,7 @@ import { JsonSchemaFormService } from '../json-schema-form.service';
 export class InputComponent implements OnInit, OnDestroy {
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
   controlValue: string;
   controlDisabled = false;

@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnDestroy, OnInit, inject, input as inputSignal, viewChild } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, OnInit, inject, input, viewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 
@@ -15,6 +15,7 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     
     <mat-form-field [appearance]="options?.appearance || matFormFieldDefaultOptions?.appearance || 'fill'"
       [class]="options?.htmlClass || ''"
+      [ngClass]="{ 'required-pending': options?.required && !(boundControl ? formControl?.value : controlValue) }"
       [floatLabel]="options?.floatLabel || matFormFieldDefaultOptions?.floatLabel || (options?.notitle ? 'never' : 'auto')"
       [hideRequiredMarker]="options?.hideRequired ? 'true' : 'false'"
       [style.width]="'100%'">
@@ -92,12 +93,18 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
       [innerHTML]="options?.errorMessage"></mat-error>
     }`,
     styles: [`
+    :host { margin-bottom: 16px; display: block; }
     mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
     ::ng-deep json-schema-form mat-form-field .mat-mdc-form-field-wrapper .mat-form-field-flex
       .mat-form-field-infix { width: initial; }
       input {width:100%;}
       /*width of 120% for type 'datetime-local' to hide firefox picker*/ 
       input[type='datetime-local'] {width:120%;}
+
+    /* Subtle highlight for required but empty controls */
+    .required-pending .mat-mdc-text-field-wrapper {
+      background-color: rgba(255, 193, 7, 0.08);
+    }
   `],
     standalone: false
 })
@@ -105,17 +112,16 @@ export class MaterialInputComponent implements OnInit, OnDestroy {
   matFormFieldDefaultOptions = inject(MAT_FORM_FIELD_DEFAULT_OPTIONS, { optional: true });
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
   controlValue: string;
   controlDisabled = false;
   boundControl = false;
   options: any;
-  layoutNodeRef:any;
   autoCompleteList: string[] = [];
-  readonly layoutNode = inputSignal<any>(undefined);
-  readonly layoutIndex = inputSignal<number[]>(undefined);
-  readonly dataIndex = inputSignal<number[]>(undefined);
+  readonly layoutNode = input<any>(undefined);
+  readonly layoutIndex = input<number[]>([]);
+  readonly dataIndex = input<number[]>([]);
 
   
   readonly input = viewChild<ElementRef>('input');

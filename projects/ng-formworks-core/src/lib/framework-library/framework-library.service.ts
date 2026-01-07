@@ -168,13 +168,16 @@ export class FrameworkLibraryService {
       actFramework.requestThemeChange(name);
       return true;
     }
+    return false;
   }
+
   //applies to CssFramework classes
-  public getActiveTheme(existingFramework?:any):{name:string,text:string}{
+  public getActiveTheme(existingFramework?:any):{name:string,text:string}|null{
     let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
     if(actFramework.getActiveTheme){
       return actFramework.getActiveTheme();
     }
+    return null;
   }
 
   //applies to CssFramework classes
@@ -183,13 +186,15 @@ export class FrameworkLibraryService {
     if(actFramework.registerTheme){
       return actFramework.registerTheme(newTheme);
     }
+    return false;
   }
 
-    //applies to CssFramework classes
-    public unregisterTheme(name:string,existingFramework?:any):boolean{
-      let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
-      if(actFramework.registerTheme){
-        return actFramework.unregisterTheme(name);
-      }
+  //applies to CssFramework classes
+  public unregisterTheme(name:string,existingFramework?:any):boolean{
+    let actFramework:Framework& { [key: string]: any; }=existingFramework||this.activeFramework;
+    if(actFramework.unregisterTheme){
+      return actFramework.unregisterTheme(name);
     }
+    return false;
+  }
 }

@@ -1,5 +1,5 @@
 import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { JsonSchemaFormService } from '@ng-formworks/core';
 
@@ -9,9 +9,9 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     template: `
     <mat-form-field [appearance]="options?.appearance || matFormFieldDefaultOptions?.appearance || 'fill'"
       [class]="options?.htmlClass || ''"
+      [ngClass]="{ 'required-pending': options?.required && !(boundControl ? formControl?.value : controlValue) }"
       [floatLabel]="options?.floatLabel || matFormFieldDefaultOptions?.floatLabel || (options?.notitle ? 'never' : 'auto')"
-      [hideRequiredMarker]="options?.hideRequired ? 'true' : 'false'"
-      [style.width]="'100%'">
+      [hideRequiredMarker]="options?.hideRequired ? 'true' : 'false'">
       @if (!options?.notitle) {
         <mat-label>{{layoutNode().options?.title}}</mat-label>
       }
@@ -33,7 +33,6 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
           [placeholder]="layoutNode().options?.title"
           [readonly]="options?.readonly"
           [required]="options?.required"
-          [style.width]="'100%'"
           (blur)="options.showErrors = true"
           >
       }
@@ -50,14 +49,14 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
           [name]="controlName"
           [placeholder]="layoutNode().options?.title"
           [required]="options?.required"
-          [style.width]="'100%'"
           [readonly]="options?.readonly"
+          [value]="controlValue"
           (blur)="options.showErrors = true"
           >
       }
       @if (options?.suffix || options?.fieldAddonRight) {
         <span matSuffix
-        [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
+          [innerHTML]="options?.suffix || options?.fieldAddonRight"></span>
       }
       @if (options?.description && (!options?.showErrors || !options?.errorMessage)) {
         <mat-hint
@@ -69,11 +68,17 @@ import { JsonSchemaFormService } from '@ng-formworks/core';
     @if (options?.showErrors && options?.errorMessage) {
       <mat-error
       [innerHTML]="options?.errorMessage"></mat-error>
-    }`,
+    }
+    `,
     styles: [`
     mat-error { font-size: 75%; margin-top: -1rem; margin-bottom: 0.5rem; }
     ::ng-deep json-schema-form mat-form-field .mat-mdc-form-field-wrapper .mat-form-field-flex
       .mat-form-field-infix { width: initial; }
+
+    /* Subtle highlight for required but empty controls */
+    .required-pending .mat-mdc-text-field-wrapper {
+      background-color: rgba(255, 193, 7, 0.08);
+    }
   `],
     standalone: false
 })
@@ -81,14 +86,14 @@ export class MaterialDatepickerComponent implements OnInit,OnDestroy {
   matFormFieldDefaultOptions = inject(MAT_FORM_FIELD_DEFAULT_OPTIONS, { optional: true });
   private jsf = inject(JsonSchemaFormService);
 
-  formControl: AbstractControl;
+  formControl: FormControl;
   controlName: string;
-  dateValue: any;
+  controlValue: any;
   controlDisabled = false;
   boundControl = false;
   options: any;
   autoCompleteList: string[] = [];
-  readonly layoutNode = input<any>(undefined);
+  readonly layoutNode = input.required<any>();
   readonly layoutIndex = input<number[]>(undefined);
   readonly dataIndex = input<number[]>(undefined);
 

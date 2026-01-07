@@ -7,39 +7,67 @@ import { JsonSchemaFormService, buildTitleMap } from '@ng-formworks/core';
     // tslint:disable-next-line:component-selector
     selector: 'material-button-group-widget',
     template: `
-    <div>
-      @if (options?.title) {
-        <div>
-          <label
-            [attr.for]="'control' + layoutNode()?._id"
-            [class]="options?.labelHtmlClass || ''"
-            [style.display]="options?.notitle ? 'none' : ''"
-          [innerHTML]="layoutNode().options?.title"></label>
-        </div>
-      }
-      <mat-button-toggle-group
-        [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
-        [attr.readonly]="options?.readonly ? 'readonly' : null"
-        [attr.required]="options?.required"
-        [disabled]="controlDisabled || options?.readonly"
-        [name]="controlName"
-        [value]="controlValue"
-        [vertical]="!!options.vertical">
-        @for (radioItem of radiosList; track radioItem) {
-          <mat-button-toggle
-            [id]="'control' + layoutNode()?._id + '/' + radioItem?.name"
-            [value]="radioItem?.value"
-            (click)="updateValue(radioItem?.value)">
-            <span [innerHTML]="radioItem?.name"></span>
-          </mat-button-toggle>
+    <div [class]="options?.htmlClass || ''">
+      <div class="button-group-container">
+        @if (options?.title) {
+          <div class="button-group-label-container">
+            <label
+              [attr.for]="'control' + layoutNode()?._id"
+              [class]="options?.labelHtmlClass || 'mat-label-medium'"
+              [style.display]="options?.notitle ? 'none' : ''"
+              [innerHTML]="layoutNode().options?.title"></label>
+          </div>
         }
-      </mat-button-toggle-group>
+        <mat-button-toggle-group
+          [attr.aria-describedby]="'control' + layoutNode()?._id + 'Status'"
+          [attr.readonly]="options?.readonly ? 'readonly' : null"
+          [attr.required]="options?.required"
+          [ngClass]="{ 'required-pending-button-group': options?.required && controlValue == null }"
+          [disabled]="controlDisabled || options?.readonly"
+          [name]="controlName"
+          [value]="controlValue"
+          [vertical]="!!options.vertical">
+          @for (radioItem of radiosList; track radioItem) {
+            <mat-button-toggle
+              [id]="'control' + layoutNode()?._id + '/' + radioItem?.name"
+              [value]="radioItem?.value"
+              (click)="updateValue(radioItem?.value)"
+              (change)="updateValue(radioItem?.value)">
+              <span [innerHTML]="radioItem?.name"></span>
+            </mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+      </div>
       @if (options?.showErrors && options?.errorMessage) {
         <mat-error
-        [innerHTML]="options?.errorMessage"></mat-error>
+          [innerHTML]="options?.errorMessage"></mat-error>
       }
     </div>`,
-    styles: [` mat-error { font-size: 75%; } `],
+    styles: [`
+      mat-error { font-size: 75%; }
+
+      .button-group-container {
+        width: 100%;
+        margin-bottom: 1.5rem;
+      }
+
+      .button-group-label-container {
+        margin-bottom: 0.75rem;
+      }
+
+      /* Keep button group in a single horizontal row; Angular Material will
+         handle vertical stacking when [vertical] is true. */
+      .button-group-container .mat-button-toggle-group {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        max-width: 100%;
+      }
+
+      /* Subtle highlight for required but empty button group */
+      .required-pending-button-group {
+        background-color: rgba(255, 193, 7, 0.08);
+      }
+    `],
     standalone: false
 })
 export class MaterialButtonGroupComponent implements OnInit,OnDestroy {

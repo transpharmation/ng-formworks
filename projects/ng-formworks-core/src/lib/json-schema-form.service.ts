@@ -5,8 +5,7 @@ import addFormats from "ajv-formats";
 import Ajv2019, { ErrorObject, Options, ValidateFunction } from 'ajv/dist/2019';
 import jsonDraft6 from 'ajv/lib/refs/json-schema-draft-06.json';
 import jsonDraft7 from 'ajv/lib/refs/json-schema-draft-07.json';
-import cloneDeep from 'lodash/cloneDeep';
-import _isArray from 'lodash/isArray';
+import { isEqual, isEqual as _isEqual, isArray as _isArray, cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import {
   deValidationMessages,
@@ -39,7 +38,6 @@ import {
   toTitleCase
 } from './shared';
 
-import { default as _isEqual, default as isEqual } from 'lodash/isEqual';
 import { setControl } from './shared/form-group.functions';
 
 
@@ -76,6 +74,21 @@ export interface ErrorMessages {
     code: string;
   }[];
 }
+
+export function traverseForm(
+  form: UntypedFormGroup | UntypedFormArray, 
+  fn: ((c: AbstractControl, name: string, path: string) => void),
+  initialPath: string = '') {
+    Object.keys(form.controls).forEach((key: string) => {
+      const abstractControl = form.controls[key];
+      const path = initialPath ? (initialPath + '.' + key) : key;
+      fn(abstractControl, key, path);
+      if (abstractControl instanceof UntypedFormGroup || abstractControl instanceof UntypedFormArray) {
+          traverseForm(abstractControl, fn, path);
+      }
+    });
+}
+
 
 @Injectable()
 export class JsonSchemaFormService implements OnDestroy {
@@ -657,6 +670,7 @@ this.ajv.addFormat("duration", {
           );
         }
       }
+      this.changeControlStatus(layoutNode, dataIndex, result);
     }
     return result;
   }
@@ -891,6 +905,81 @@ this.ajv.addFormat("duration", {
     formArray.markAsDirty();
     */
   }
+
+  makeControlValid = (abstractControl: AbstractControl) => {
+    if (!(abstractControl instanceof UntypedFormGroup) && !(abstractControl instanceof UntypedFormArray)) {
+       abstractControl.setErrors(null);
+       abstractControl.setValidators([]);
+    }
+  }
+
+  changeControlStatus(layoutNode: any, dataIndex: number[], require: boolean) {
+    // Check if there are child controls that will be hidden; if so,
+    // make them not required - DM
+    const visible = require;
+
+    const previousVisible = layoutNode._lastVisible;
+    if (previousVisible === visible) {
+      return;
+    }
+    layoutNode._lastVisible = visible;
+
+    if (layoutNode?.items?.length > 0) {
+      let childControl;
+      for (let item of layoutNode.items) {
+        if (item?.dataPointer) {
+          childControl = getControl(this.formGroup, item.dataPointer);
+          if (childControl) {
+            if (visible) {
+              if (childControl.disabled) {
+                childControl.enable({ emitEvent: false });
+              }
+            } else {
+              if (!childControl.disabled) {
+                childControl.disable({ emitEvent: false });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const dataPointer = JsonPointer.toIndexedPointer(
+      layoutNode.dataPointer,
+      dataIndex,
+      this.arrayMap
+    );
+    const schemaPointer=layoutNode?.isITEItem ? layoutNode.schemaPointer : null;
+    const oneOfPointer=layoutNode.oneOfPointer;
+    const anyOfPointer=layoutNode?.anyOfPointer;
+    const ctrl = getControl(
+      this.formGroup, dataPointer,false, schemaPointer||oneOfPointer||anyOfPointer);
+ 
+
+    if (!ctrl) {
+      return;
+    }
+
+    if (visible) {
+      if (ctrl.disabled) {
+        ctrl.enable({ emitEvent: false });
+      }
+    } else {
+      if (!ctrl.disabled) {
+        ctrl.disable({ emitEvent: false });
+      }
+      if (layoutNode.options.required) {
+        if (ctrl instanceof UntypedFormGroup || ctrl instanceof UntypedFormArray) {
+          traverseForm(ctrl, this.makeControlValid);
+        } else {
+          this.makeControlValid(ctrl);
+        }
+      }
+    }
+
+    ctrl.updateValueAndValidity({ emitEvent: false });
+  }
+
   getFormControl(ctx: WidgetContext): AbstractControl {
     if (
       !ctx || !ctx.layoutNode ||
