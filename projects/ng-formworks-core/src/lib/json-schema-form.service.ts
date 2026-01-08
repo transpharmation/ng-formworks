@@ -436,7 +436,7 @@ this.ajv.addFormat("duration", {
   }
 
 
-  
+
   buildFormGroup(ajvInstanceName?: string) {
     this.formGroup = <UntypedFormGroup>buildFormGroup(this.formGroupTemplate);
     if (this.formGroup) {
@@ -760,23 +760,23 @@ this.ajv.addFormat("duration", {
       return true; // No condition means the layout node is visible
     }
 
+    let result = true;
     if (typeof condition === 'string') {
-      return this.evaluateStringCondition(condition, dataIndex);
-    } 
-    
-    if (typeof condition === 'function') {
+      result = this.evaluateStringCondition(condition, dataIndex);
+    }
+
+    else if (typeof condition === 'function') {
       // Direct function execution is safe and standard
       try {
-          return condition(this.data);
+          result = condition(this.data);
       } catch (e) {
+          result = true;
           console.error('Condition function errored out:', e);
-          return true; // Default to visible on error
       }
-    } 
-    
-    
+    }  
+
     // Check if it matches the FunctionCondition interface structure
-    if (typeof condition === 'object' 
+    else if (typeof condition === 'object' 
       && (typeof (condition as FunctionCondition)?.functionBody === 'string'
       ||typeof (condition as FunctionCondition)?.functionBodyRaw === 'string')
     ) {
@@ -794,11 +794,11 @@ this.ajv.addFormat("duration", {
           .replace(/\?\?\./g,"?")
           .replace(/(\?)(\.\[)/g,'[')
         }
-
-        return this.evaluateFunctionBodyCondition(condition_nullChecks as FunctionCondition, dataIndex);
+        result = this.evaluateFunctionBodyCondition(condition_nullChecks as FunctionCondition, dataIndex);
     }
 
-    return true; // Default visible if condition type is unknown
+    this.changeControlStatus(layoutNode, dataIndex, result);
+    return result;
   }
 
   private evaluateStringCondition(pointer: string, dataIndex: number[]): boolean {
@@ -811,14 +811,12 @@ this.ajv.addFormat("duration", {
     }
 
     const parsedPointer = JsonPointer.parseObjectPath(pointer);
-    
-    // Simplify data retrieval
-    // The original logic checked both 'this.data' and '{model: this.data}' roots.
-    // We assume the pointer library handles root context correctly, 
-    // or we consistently check one context.
-    
-    const value = JsonPointer.get(this.data, parsedPointer);
-    return !!value; // Convert truthy/falsy value to a strict boolean
+    // Convert truthy/falsy value to a strict boolean
+    let result = !!JsonPointer.get(this.data, parsedPointer);
+    if (!result && parsedPointer?.[0] === 'model') {
+      result = !!JsonPointer.get({ model: this.data }, parsedPointer);
+    }
+    return result;
   }
 
   private evaluateFunctionBodyCondition(condition: FunctionCondition, dataIndex: number[]): boolean {
@@ -1097,7 +1095,7 @@ this.ajv.addFormat("duration", {
 
   changeControlStatus(layoutNode: any, dataIndex: number[], require: boolean) {
     // Check if there are child controls that will be hidden; if so,
-    // make them not required - DM
+    // make them not required - [Dan Milgram]
     const visible = require;
 
     const previousVisible = layoutNode._lastVisible;
